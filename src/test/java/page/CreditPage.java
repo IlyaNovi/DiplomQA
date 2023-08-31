@@ -1,47 +1,61 @@
 package page;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
-import data.DataHelper;
 
 import java.time.Duration;
 
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selectors.withText;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 
 public class CreditPage {
-    private final SelenideElement heading = $$("h3").find(text("Кредит по данным карты"));
-    private final SelenideElement cardNumber = $(byText("Номер карты")).parent().$("input__control");
-    private final SelenideElement month = $(byText("Месяц")).parent().$("input__control");
-    private final SelenideElement year = $ (byText("Год")).parent().$("input__control");
-    private final SelenideElement cardHolder = $(byText("Владелец")).parent().$("input__control");
-    private final SelenideElement cvc =  $(byText("CVC/CVV")).parent().$("input__control");
-    private final SelenideElement continueButton = $(byText("Продолжить")).parent().$("button__content");
+    private SelenideElement fieldCardNumber = $("[placeholder='0000 0000 0000 0000']");
+    private SelenideElement cardSize = $("[maxLength='19']");
+    private SelenideElement fieldMonth = $("[placeholder='08']");
+    private SelenideElement fieldYear = $("[placeholder='22']");
+    private SelenideElement fieldOwner = $$("[class='input__control']").get(3);
+    private SelenideElement fieldCvc = $("[placeholder='999']");
+    private SelenideElement buttonContinue = $(byText("Продолжить"));
 
-       public CreditPage() {
-        heading.shouldBe(visible);
-        heading.shouldHave(text("Кредит по данным карты"));
+    private SelenideElement bankApproved = $(withText("Операция одобрена Банком."));
+    private SelenideElement bankRefusal = $(withText("Ошибка! Банк отказал в проведении операции."));
+    private SelenideElement errorFormat = $(withText("Неверный формат"));
+    private SelenideElement invalidDurationCard = $(withText("Неверно указан срок действия карты"));
+    private SelenideElement cardExpired = $(withText("Истёк срок действия карты"));
+    private SelenideElement requiredField = $(withText("Поле обязательно для заполнения"));
+
+    public void fillOutFields(String cardNumber, String month, String year, String owner, String cvc) {
+        fieldCardNumber.setValue(cardNumber);
+        fieldMonth.setValue(month);
+        fieldYear.setValue(year);
+        fieldOwner.setValue(owner);
+        fieldCvc.setValue(cvc);
+        buttonContinue.click();
     }
 
-    public void insertCardData(DataHelper.CardInfo cardInfo) {
-        cardNumber.setValue(cardInfo.getCardNumber());
-        month.setValue(cardInfo.getMonth());
-        year.setValue(cardInfo.getYear());
-        cardHolder.setValue(cardInfo.getCardHolder());
-        cvc.setValue(cardInfo.getCvc());
-        continueButton.click();
+    public void expectApprovalFromBank() {
+        bankApproved.shouldBe(visible, Duration.ofSeconds(15));
     }
 
-    public void checkApprovedNotification() {
-        SelenideElement successfulNotification = $(".notification_status_ok .notification__content").shouldHave(Condition.text("Операция одобрена Банком."), Duration.ofMillis(15000));
-        successfulNotification.shouldBe(Condition.visible);
+    public void expectRejectionFromBank() {
+        bankRefusal.shouldBe(visible, Duration.ofSeconds(15));
     }
 
-    public void checkDeclinedNotification() {
-        SelenideElement declineNotification = $(".notification_status_error .notification__content").shouldHave(Condition.text("Ошибка! Банк отказал в проведении операции."), Duration.ofMillis(15000));
-        declineNotification.shouldBe(Condition.visible);
+    public void waitInvalidFormat() {
+        errorFormat.shouldBe(visible);
+    }
+
+    public void waitNecessaryFillOutField() {
+        requiredField.shouldBe(visible);
+    }
+
+    public void waitInvalidDuration() {
+        invalidDurationCard.shouldBe(visible);
+    }
+
+    public void waitInvalidYear() {
+        cardExpired.shouldBe(visible);
     }
 }
-

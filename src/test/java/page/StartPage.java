@@ -1,27 +1,28 @@
 package page;
 
+
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
 
+
 public class StartPage {
-    private static SelenideElement heading = $(byText("Путешествие дня"));
-    private static SelenideElement buyButton = $(byText("Купить"));
-    private static SelenideElement creditButton = $(byText("Купить в кредит"));
+    private SelenideElement buttonBuy = $(byText("Купить"));
+    private SelenideElement buttonBuyByCredit = $(byText("Купить в кредит"));
+    private SelenideElement byCard = $(byText("Оплата по карте"));
+    private SelenideElement byCredit = $(byText("Кредит по данным карты"));
 
-    public StartPage() {
-        heading.shouldBe(visible);
-    }
-
-    public OrderCardPage goToOrderCardPage() {
-        buyButton.click();
+    public OrderCardPage buyWithoutCredit() {
+        buttonBuy.click();
+        byCard.shouldBe(visible);
         return new OrderCardPage();
     }
 
-    public CreditPage goToCreditPage() {
-        creditButton.click();
+    public CreditPage buyWithCredit() {
+        buttonBuyByCredit.click();
+        byCredit.shouldBe(visible);
         return new CreditPage();
     }
 }
